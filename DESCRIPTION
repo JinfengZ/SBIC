@@ -1,0 +1,11 @@
+Package: SBic
+Title: Sequential biclustering of gene expressions and follow-up analysis
+Version: 0.1
+Date: 2017-09-03
+Author: Yuhang Liu, Mayassa J. Bou-Dargham, Qing-Xiang Amy Sang, and Jinfeng Zhang
+Maintainer: Yuhang Liu <fhlsjs@gmail.com>
+Description: This is a comprehensive analysis pipeline based on sequential biclustering.
+Depends: R (>= 3.0.0)
+Suggests: biclust, rpart, rpart.plot 
+License: LGPL
+LazyLoad: yes
