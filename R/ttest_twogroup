@@ -1,0 +1,39 @@
+##Generic t test function, between Tum_Tum or Tum_Nor
+##Input two matrices, N is the number of multiple adjustment, not necessarily equal to ngenes
+t_test_generic<-function(X, Y, N, na.rm=TRUE){
+  ## Verify the inputs are numeric
+  if (is.numeric(X)==0 | is.numeric(Y)==0) {
+    stop("Error: Input matrices must be numeric!")
+  } else if (identical(rownames(X),rownames(Y))==0) {
+    stop("Gene names in treatment and control do not match. Please check your input data!")
+    ## This must be satisfied when comparing Tum_Tum, but in the case of Tum_Nor, if you accidentally
+    ## messed up data or the two data files are not from the same platform, or even one of them is 
+    ## using different gene synonyms, the program will ask you to check for these issues.
+  } else {
+    ngenes <- nrow(X)
+    ## rawp just for 2-sided test
+    rawp <- adjp <- log2FC <- numeric(ngenes)
+    for (i in 1:ngenes){
+      rawp[i] <- t.test(X[i,], Y[i,], alternative = "two.sided", mu = 0, 
+                        paired = FALSE, var.equal = FALSE, conf.level = 0.95)$p.value
+      log2FC[i] <- mean(X[i,])-mean(Y[i,])
+    }
+  }
+  adjp <- p.adjust(rawp,method="BH",n=N)
+  reg <- character(ngenes)
+  for (i in 1:ngenes){
+  	if (adjp[i]<=0.05 & log2FC[i]>=0.5){
+  		reg[i]<-"Up-regulated"
+  	}else if(adjp[i]<=0.05 & log2FC[i]<= -0.5){
+  		reg[i]<-"Down-regulated"
+  	}else{
+  		reg[i]<-"not DE"
+  		}
+  		}
+    ##cbind p-values, (log2) fold changes, and the final result regulation status
+  result <- cbind(apply(X,1,mean),rep(ncol(X),nrow(X)),apply(Y,1,mean),rep(ncol(Y),nrow(Y)),rawp,adjp,log2FC,reg)
+  colnames(result) <- c("Mean of patients in bicluster","Number of patients in bicluster",
+                        "Mean of other patients","Number of other patients","Raw p-value",
+                        "Adjusted 2-sided p-value","Log2 fold-change","Regulation Class")
+  return(result)
+}
